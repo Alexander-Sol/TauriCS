@@ -1,0 +1,4 @@
+# .NET Core build artifacts
+bin/
+obj/Debug
+obj/Release

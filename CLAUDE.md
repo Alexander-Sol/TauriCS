@@ -18,7 +18,15 @@ npm run tauri build
 npm run cs:make MyNewLibrary
 ```
 
-There are no test commands — this is a template/demo project without a test suite.
+# Run frontend tests (Vitest)
+npm test
+npm run test:watch
+
+# Run Rust command tests
+cd src-tauri && cargo test
+
+# Run C# xUnit tests
+dotnet test src-csharp/Tests/ImspConverterTests/
 
 ## Architecture
 
@@ -87,3 +95,55 @@ Update `ALLOWED_PROCESSES` in the generated `NativeEntry.cs` if the app executab
 ### Pre-compiled / External DLLs
 
 Drop any platform-native library (`.dll` on Windows, `.dylib` on macOS, `.so` on Linux) into the root `natives/` directory. They will be synced to `src-tauri/natives/` and bundled. If they don't export the required symbols, Rust will skip them silently (logged as "might be a utility DLL"). C# libraries can load these at runtime via `NativeLoader.LoadFunction<T>`.
+
+### Referencing Managed DLLs from a Native AOT Library
+
+When a C# native library needs to call into regular managed assemblies (e.g., mzLib), place the DLLs in `src-csharp/lib/mzLib/` and reference them via `<HintPath>` in the `.csproj`. Because mzLib is not AOT-annotated, add a `TrimmerRoots.xml` that preserves all types, and set `<SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>`. See `src-csharp/Native/ImspConverter/` for a working example.
+
+---
+
+## Testing
+
+### Rust Command Tests (`cargo test`)
+
+Tests live in a `#[cfg(test)]` module at the bottom of `src-tauri/src/lib.rs`. They use `tauri::test::mock_builder()` to spin up a real app instance with managed state but no webview. The `test` feature must be enabled in `Cargo.toml`:
+
+```toml
+tauri = { version = "2", features = ["test"] }
+```
+
+**Limitation**: `start_streaming_task` takes `AppHandle`, which is not implemented for `MockRuntime`. Register only `call_backend` and `call_backend_external` in the mock invoke handler.
+
+### Frontend Tests (`npm test`)
+
+Vitest + jsdom. Config at `vitest.config.js`. Tests live in `src/__tests__/`. Mock `invoke` with:
+
+```js
+vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn() }));
+```
+
+Tests verify the JSON request shape sent to `invoke`, successful response parsing, error field surfacing, and invoke rejections.
+
+### C# Library Tests (`dotnet test`)
+
+xUnit test projects in `src-csharp/Tests/`. These test C# service logic directly without going through the Tauri/Rust layer. Reference mzLib DLLs from `src-csharp/lib/mzLib/` via `<HintPath>`.
+
+`ImspConverterTests` verifies end-to-end: mzML → `.imsp` file, magic bytes, scan count, and first-scan retention times.
+
+---
+
+## ImspConverter Library
+
+`src-csharp/Native/ImspConverter/` — converts `.mzML` files to `.imsp` format using mzLib.
+
+**Request** (JSON passed to `call_backend` with `nativeName: 'imspconverter'`):
+```json
+{ "MzmlPath": "/path/to/file.mzML", "OutputPath": "/optional/out.imsp" }
+```
+
+**Response**:
+```json
+{ "ImspPath": "/path/to/file.imsp", "Error": null }
+```
+
+Output path defaults to the same directory as the input with `.imsp` extension. The IMSP format spec is documented in `/Users/alex/Projects/MsBrowser/IMSP_Format.md`.

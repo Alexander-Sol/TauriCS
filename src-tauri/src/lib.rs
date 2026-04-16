@@ -237,3 +237,51 @@ pub fn run() {
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tauri::test::{mock_builder, mock_context, noop_assets};
+
+    /// Build a mock Tauri app with NativeManager state but no libraries loaded.
+    fn build_mock_app() -> tauri::App<tauri::test::MockRuntime> {
+        mock_builder()
+            .manage(NativeManager { natives: Mutex::new(HashMap::new()) })
+            // start_streaming_task requires AppHandle which is not supported by MockRuntime.
+            .invoke_handler(tauri::generate_handler![
+                call_backend,
+                call_backend_external
+            ])
+            .build(mock_context(noop_assets()))
+            .expect("failed to build mock app")
+    }
+
+    /// A missing library should return a descriptive Err, not panic.
+    #[test]
+    fn call_backend_missing_library_returns_error() {
+        let app = build_mock_app();
+        let state = app.state::<NativeManager>();
+        let result = call_backend("nonexistent".into(), "{}".into(), state);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("not found"));
+    }
+
+    /// Same for the external variant.
+    #[test]
+    fn call_backend_external_missing_library_returns_error() {
+        let app = build_mock_app();
+        let state = app.state::<NativeManager>();
+        let result = call_backend_external("nonexistent".into(), "{}".into(), state);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("not found"));
+    }
+
+    /// NativeManager starts empty.
+    #[test]
+    fn native_manager_starts_empty() {
+        let app = build_mock_app();
+        let state = app.state::<NativeManager>();
+        let natives = state.natives.lock().unwrap();
+        assert!(natives.is_empty());
+    }
+}

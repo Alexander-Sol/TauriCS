@@ -5,9 +5,14 @@
   "type": "module",
   "scripts": {
     "tauri": "tauri",
-    "cs:make": "node ./.scripts/make-native.mjs"
+    "cs:make": "node ./.scripts/make-native.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^2"
+    "@tauri-apps/api": "^2.10.1",
+    "@tauri-apps/cli": "^2",
+    "jsdom": "^29.0.2",
+    "vitest": "^4.1.4"
   }
 }

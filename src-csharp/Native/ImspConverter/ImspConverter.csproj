@@ -1,0 +1,48 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Globals\Globals.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+
+  <PropertyGroup>
+    <PublishAot>true</PublishAot>
+    <OutputType>Library</OutputType>
+    <!-- mzLib is not AOT-annotated; suppress trim warnings from its assemblies -->
+    <TrimmerRootDescriptor>TrimmerRoots.xml</TrimmerRootDescriptor>
+    <SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="Readers">
+      <HintPath>..\..\lib\mzLib\Readers.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="MassSpectrometry">
+      <HintPath>..\..\lib\mzLib\MassSpectrometry.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="MzLibUtil">
+      <HintPath>..\..\lib\mzLib\MzLibUtil.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Chemistry">
+      <HintPath>..\..\lib\mzLib\Chemistry.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Transcriptomics">
+      <HintPath>..\..\lib\mzLib\Transcriptomics.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="UsefulProteomicsDatabases">
+      <HintPath>..\..\lib\mzLib\UsefulProteomicsDatabases.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+</Project>

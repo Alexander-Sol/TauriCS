@@ -1,0 +1,8 @@
+<linker>
+  <assembly fullname="Readers" preserve="all" />
+  <assembly fullname="MassSpectrometry" preserve="all" />
+  <assembly fullname="MzLibUtil" preserve="all" />
+  <assembly fullname="Chemistry" preserve="all" />
+  <assembly fullname="Transcriptomics" preserve="all" />
+  <assembly fullname="UsefulProteomicsDatabases" preserve="all" />
+</linker>
