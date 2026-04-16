@@ -64,22 +64,30 @@ public static class NativeLoader
     /// <returns>A callable delegate of type T.</returns>
     public static T LoadFunction<T>(string libraryName, string functionName) where T : Delegate
     {
-        // Ensure the library name ends with .dll for consistency.
-        if (!libraryName.EndsWith(".dll"))
-        {
-            libraryName += ".dll";
-        }
+        // Normalise to a bare name then append the platform-correct extension.
+        // Callers may pass "Foo", "Foo.dll", "Foo.dylib", etc.
+        foreach (var ext in new[] { ".dll", ".dylib", ".so" })
+            if (libraryName.EndsWith(ext, StringComparison.OrdinalIgnoreCase))
+                libraryName = libraryName[..^ext.Length];
+
+        string nativeExt = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "dll"
+                         : RuntimeInformation.IsOSPlatform(OSPlatform.OSX)     ? "dylib"
+                         : "so";
+        libraryName = $"{libraryName}.{nativeExt}";
 
         IntPtr libraryHandle;
         // Check the cache first to see if the library is already loaded.
         if (!_loadedLibraries.TryGetValue(libraryName, out libraryHandle))
         {
-            // If not in the cache, load the library using the modern NativeLibrary API.
-            // It will automatically search in the application's base directory (where all our DLLs are).
-            libraryHandle = NativeLibrary.Load(libraryName);
+            // Resolve the full path: all native libraries live in a "natives/" subdirectory
+            // next to the host executable. NativeLibrary.Load with a bare name only searches
+            // system paths, which does not include the app's own natives directory.
+            var exeDir = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule!.FileName)!;
+            var fullPath = Path.Combine(exeDir, "natives", libraryName);
+            libraryHandle = NativeLibrary.Load(fullPath);
             // Add the handle to the cache for future calls.
             _loadedLibraries[libraryName] = libraryHandle;
-            Console.WriteLine($"[NativeLoader] Loaded external library: {libraryName}");
+            Console.WriteLine($"[NativeLoader] Loaded external library: {fullPath}");
         }
 
         // Get the memory address (pointer) of the exported function.

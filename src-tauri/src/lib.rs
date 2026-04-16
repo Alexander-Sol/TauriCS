@@ -193,7 +193,7 @@ pub fn run() {
             // Scan the 'natives' directory for all .dll files.
             if let Ok(entries) = std::fs::read_dir(natives_dir) {
                 for entry in entries.filter_map(Result::ok) {
-                    if entry.path().extension().map_or(false, |e| e == "dll") {
+                    if entry.path().extension().map_or(false, |e| e == std::env::consts::DLL_EXTENSION) {
                         // Use a closure to handle potential errors gracefully without crashing the app.
                         let result: Result<(), Box<dyn std::error::Error>> = (|| unsafe {
                             let lib = Library::new(entry.path())?;

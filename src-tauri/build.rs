@@ -46,7 +46,24 @@ fn main() {
     let profile = env::var("PROFILE").unwrap();
     let config = if profile == "release" { "Release" } else { "Debug" };
     let csharp_root = PathBuf::from("../src-csharp");
-    let target_rid = "win-x64"; // Target Windows 64-bit architecture.
+    // Determine the .NET Runtime Identifier based on the current build target.
+    let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap();
+    let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap();
+    let target_rid = match (target_os.as_str(), target_arch.as_str()) {
+        ("windows", "x86_64") => "win-x64",
+        ("windows", "aarch64") => "win-arm64",
+        ("macos", "x86_64") => "osx-x64",
+        ("macos", "aarch64") => "osx-arm64",
+        ("linux", "x86_64") => "linux-x64",
+        ("linux", "aarch64") => "linux-arm64",
+        (os, arch) => panic!("Unsupported platform: {}-{}", os, arch),
+    };
+    // .NET Native AOT produces platform-specific library extensions.
+    let native_ext = match target_os.as_str() {
+        "windows" => "dll",
+        "macos"   => "dylib",
+        _         => "so",
+    };
 
     // --- Stage 1: Build all C# projects from source ---
 
@@ -80,9 +97,9 @@ fn main() {
             let framework_scan_path = entry.path().join("bin").join(config);
             let dotnet_framework = fs::read_dir(framework_scan_path).ok().and_then(|d| d.filter_map(Result::ok).map(|e| e.file_name().into_string().unwrap()).filter(|n| n.starts_with("net")).max()).unwrap_or_else(|| "net9.0".to_string());
 
-            let published_dll_path = entry.path().join("bin").join(config).join(&dotnet_framework).join(target_rid).join("publish").join(format!("{}.dll", native_name));
+            let published_dll_path = entry.path().join("bin").join(config).join(&dotnet_framework).join(target_rid).join("publish").join(format!("{}.{}", native_name, native_ext));
             if published_dll_path.exists() {
-                fs::copy(&published_dll_path, root_natives_staging_dir.join(format!("{}.dll", native_name))).unwrap();
+                fs::copy(&published_dll_path, root_natives_staging_dir.join(format!("{}.{}", native_name, native_ext))).unwrap();
             }
         }
     }

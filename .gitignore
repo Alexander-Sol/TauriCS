@@ -12,6 +12,17 @@ dist
 dist-ssr
 *.local
 
+# C# build artifacts
+src-csharp/**/obj/
+src-csharp/**/bin/
+
+# Auto-generated native library staging directory (populated by build.rs)
+src-tauri/natives/
+
+# Platform-compiled native libraries (Windows .dll examples in natives/ are committed intentionally)
+natives/*.dylib
+natives/*.so
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
