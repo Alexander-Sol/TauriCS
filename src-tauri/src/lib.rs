@@ -12,7 +12,6 @@
  * 3. Managing the loaded libraries in a shared state.
  * 4. Exposing Tauri commands that the frontend can call to interact with the C# backend.
  */
-
 // --- Crate Imports ---
 use libloading::{Library, Symbol};
 use std::collections::HashMap;
@@ -175,11 +174,20 @@ fn start_streaming_task(
     }
 }
 
+/// Read an arbitrary file from disk and return its raw bytes.
+/// Used by the frontend to read .imsp files after conversion.
+#[tauri::command]
+fn read_imsp_file(path: String) -> Result<tauri::ipc::Response, String> {
+    let bytes = std::fs::read(&path).map_err(|e| format!("Failed to read '{}': {}", path, e))?;
+    Ok(tauri::ipc::Response::new(bytes))
+}
+
 // --- Application Entry Point ---
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         // Initialize and manage the NativeManager state.
         .manage(NativeManager { natives: Mutex::new(HashMap::new()) })
@@ -187,6 +195,7 @@ pub fn run() {
         .setup(|app| {
             // Determine the correct path to the 'natives' directory.
             let natives_dir = app.path().resource_dir().unwrap().join("natives");
+            std::env::set_var("TAURICS_NATIVES_DIR", &natives_dir);
             let state: tauri::State<NativeManager> = app.state();
             let mut natives = state.natives.lock().unwrap();
 
@@ -233,7 +242,7 @@ pub fn run() {
             Ok(())
         })
         // Register all the Tauri commands so the frontend can call them.
-        .invoke_handler(tauri::generate_handler![call_backend, start_streaming_task, call_backend_external])
+        .invoke_handler(tauri::generate_handler![call_backend, start_streaming_task, call_backend_external, read_imsp_file])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -246,7 +255,9 @@ mod tests {
     /// Build a mock Tauri app with NativeManager state but no libraries loaded.
     fn build_mock_app() -> tauri::App<tauri::test::MockRuntime> {
         mock_builder()
-            .manage(NativeManager { natives: Mutex::new(HashMap::new()) })
+            .manage(NativeManager {
+                natives: Mutex::new(HashMap::new()),
+            })
             // start_streaming_task requires AppHandle which is not supported by MockRuntime.
             .invoke_handler(tauri::generate_handler![
                 call_backend,

@@ -1,0 +1,61 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Exe</OutputType>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <PublishTrimmed>false</PublishTrimmed>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="Readers">
+      <HintPath>..\..\lib\mzLib\Readers.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="MassSpectrometry">
+      <HintPath>..\..\lib\mzLib\MassSpectrometry.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="MzLibUtil">
+      <HintPath>..\..\lib\mzLib\MzLibUtil.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Chemistry">
+      <HintPath>..\..\lib\mzLib\Chemistry.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Transcriptomics">
+      <HintPath>..\..\lib\mzLib\Transcriptomics.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="UsefulProteomicsDatabases">
+      <HintPath>..\..\lib\mzLib\UsefulProteomicsDatabases.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="ThermoFisher.CommonCore.BackgroundSubtraction">
+      <HintPath>..\..\lib\mzLib\ThermoFisher.CommonCore.BackgroundSubtraction.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="ThermoFisher.CommonCore.Data">
+      <HintPath>..\..\lib\mzLib\ThermoFisher.CommonCore.Data.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="ThermoFisher.CommonCore.MassPrecisionEstimator">
+      <HintPath>..\..\lib\mzLib\ThermoFisher.CommonCore.MassPrecisionEstimator.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="ThermoFisher.CommonCore.RawFileReader">
+      <HintPath>..\..\lib\mzLib\ThermoFisher.CommonCore.RawFileReader.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.0" />
+  </ItemGroup>
+
+</Project>

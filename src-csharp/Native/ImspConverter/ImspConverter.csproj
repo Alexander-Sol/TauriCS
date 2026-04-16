@@ -4,6 +4,10 @@
     <ProjectReference Include="..\..\Globals\Globals.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.0" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -42,6 +46,26 @@
     </Reference>
     <Reference Include="UsefulProteomicsDatabases">
       <HintPath>..\..\lib\mzLib\UsefulProteomicsDatabases.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="ThermoFisher.CommonCore.BackgroundSubtraction">
+      <HintPath>..\..\lib\mzLib\ThermoFisher.CommonCore.BackgroundSubtraction.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="ThermoFisher.CommonCore.Data">
+      <HintPath>..\..\lib\mzLib\ThermoFisher.CommonCore.Data.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="ThermoFisher.CommonCore.MassPrecisionEstimator">
+      <HintPath>..\..\lib\mzLib\ThermoFisher.CommonCore.MassPrecisionEstimator.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="ThermoFisher.CommonCore.RawFileReader">
+      <HintPath>..\..\lib\mzLib\ThermoFisher.CommonCore.RawFileReader.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="System.Data.SQLite">
+      <HintPath>..\..\..\natives\System.Data.SQLite.dll</HintPath>
       <Private>true</Private>
     </Reference>
   </ItemGroup>
